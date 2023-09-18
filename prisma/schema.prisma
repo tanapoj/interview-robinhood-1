@@ -1,0 +1,35 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["rhel-openssl-1.0.x", "native", "linux-arm64-openssl-1.1.x"]
+}
+
+enum InterviewStatus {
+  Todo
+  InProgress
+  Done
+}
+
+model User {
+  id         Int         @id @default(autoincrement())
+  name       String
+  email      String
+  interviews Interview[]
+}
+
+model Interview {
+  id          Int             @id @default(autoincrement())
+  description String
+  status      InterviewStatus
+  user        User            @relation(fields: [userId], references: [id])
+  userId      Int
+  createdAt   DateTime
+  archivedAt  DateTime?
+}
