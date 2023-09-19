@@ -1,7 +1,7 @@
 import {PrismaService} from './prisma/prisma.service'
-import {Body, Controller, Get, Param, Post, Put} from '@nestjs/common'
+import {Body, Controller, Get, Param, ParseIntPipe, Post, Put, Query} from '@nestjs/common'
 import {AppService} from './app.service'
-import {Comment, Interview, User} from '@prisma/client'
+import {Comment, Interview, InterviewStatus, User} from '@prisma/client'
 import {UserCreateDto, UserUpdateDto} from "./dto/UserDto"
 import {InterviewCreateDto, InterviewUpdateDto} from "./dto/InterviewDto";
 import {CommentCreateDto} from "./dto/CommentDto";
@@ -46,11 +46,16 @@ export class AppController {
     }
 
     @Get('interviews')
-    getInterviews(): Promise<Interview[]> {
+    getInterviews(@Query('status') status: string): Promise<Interview[]> {
+        const where = {
+            archivedAt: null,
+        }
+        if (status in InterviewStatus) {
+            where['status'] = status
+        }
+        console.log({where, status})
         return this.db.interview.findMany({
-            where: {
-                archivedAt: null,
-            }
+            where,
         })
     }
 
@@ -100,10 +105,10 @@ export class AppController {
     }
 
     @Put('interviews/:id/archived')
-    putInterviewArchived(@Param() id: number): Promise<Interview> {
+    putInterviewArchived(@Param('id') id: number): Promise<Interview> {
         return this.db.interview.update({
             where: {
-                id,
+                id: +id,
             },
             data: {
                 archivedAt: new Date(),
