@@ -2,8 +2,9 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider          = "mysql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 generator client {
@@ -22,6 +23,7 @@ model User {
   name       String
   email      String
   interviews Interview[]
+  comments   Comment[]
 }
 
 model Interview {
@@ -32,4 +34,15 @@ model Interview {
   userId      Int
   createdAt   DateTime
   archivedAt  DateTime?
+  comments    Comment[]
+}
+
+model Comment {
+  id          Int       @id @default(autoincrement())
+  comment     String
+  user        User      @relation(fields: [userId], references: [id])
+  userId      Int
+  interview   Interview @relation(fields: [interviewId], references: [id])
+  interviewId Int
+  createdAt   DateTime
 }

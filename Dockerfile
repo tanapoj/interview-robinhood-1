@@ -9,6 +9,7 @@ COPY package*.json ./
 COPY prisma ./prisma/
 
 # Install app dependencies
+RUN apt-get update && apt-get install -y openssl libssl-dev
 RUN npm install
 # RUN npx prisma generate
 

@@ -1,7 +1,10 @@
-import {PrismaService} from './prisma/prisma.service';
-import {Controller, Get, Post} from '@nestjs/common';
-import {AppService} from './app.service';
-import {Interview, User} from '@prisma/client';
+import {PrismaService} from './prisma/prisma.service'
+import {Body, Controller, Get, Param, Post, Put} from '@nestjs/common'
+import {AppService} from './app.service'
+import {Comment, Interview, User} from '@prisma/client'
+import {UserCreateDto, UserUpdateDto} from "./dto/UserDto"
+import {InterviewCreateDto, InterviewUpdateDto} from "./dto/InterviewDto";
+import {CommentCreateDto} from "./dto/CommentDto";
 
 @Controller()
 export class AppController {
@@ -13,31 +16,99 @@ export class AppController {
 
     @Get()
     getHello(): string {
-        return this.appService.getHello();
+        return this.appService.getHello()
     }
 
-    @Post('user')
-    postUser(): Promise<User> {
+    @Get('users')
+    getUsers(): Promise<User[]> {
+        return this.db.user.findMany()
+    }
+
+    @Post('users')
+    postUser(@Body() body: UserCreateDto): Promise<User> {
         return this.db.user.create({
             data: {
-                name: 'admin',
-                email: 'admin@interview.com',
+                ...body,
             }
-        });
+        })
+    }
+
+    @Put('users/:id')
+    putUser(@Param() id: number, @Body() body: UserUpdateDto): Promise<User> {
+        return this.db.user.update({
+            where: {
+                id,
+            },
+            data: {
+                ...body,
+            }
+        })
     }
 
     @Get('interviews')
     getInterviews(): Promise<Interview[]> {
-        return this.db.interview.findMany();
+        return this.db.interview.findMany({
+            where: {
+                archivedAt: null,
+            }
+        })
     }
 
-    // @Post('interviews')
-    // postInterview(): Promise<Interview> {
-    //     return this.db.interview.create({
-    //         data: {
-    //             user
-    //         }
-    //     });
-    // }
+    @Get('interviews/:id')
+    getInterview(): Promise<Interview> {
+        return this.db.interview.findFirst({
+            where: {
+                archivedAt: null,
+            },
+            include: {
+                user: true,
+                comments: true,
+            }
+        })
+    }
+
+    @Post('interviews')
+    postInterview(@Body() body: InterviewCreateDto): Promise<Interview> {
+        return this.db.interview.create({
+            data: {
+                ...body,
+                createdAt: new Date(),
+            }
+        })
+    }
+
+    @Post('interviews/:id/comment')
+    postInterviewComment(@Param() id: number, @Body() body: CommentCreateDto): Promise<Comment> {
+        return this.db.comment.create({
+            data: {
+                ...body,
+                createdAt: new Date(),
+            }
+        })
+    }
+
+    @Put('interviews/:id')
+    putInterview(@Param() id: number, @Body() body: InterviewUpdateDto): Promise<Interview> {
+        return this.db.interview.update({
+            where: {
+                id,
+            },
+            data: {
+                ...body,
+            }
+        })
+    }
+
+    @Put('interviews/:id/archived')
+    putInterviewArchived(@Param() id: number): Promise<Interview> {
+        return this.db.interview.update({
+            where: {
+                id,
+            },
+            data: {
+                archivedAt: new Date(),
+            }
+        })
+    }
 
 }

@@ -2,53 +2,65 @@ version: '3.8'
 services:
 
   api:
-    build:
-      context: .
-      dockerfile: Dockerfile
     container_name: api
-#    restart: always
-    restart: unless-stopped
+    build:
+      dockerfile: Dockerfile
+      context: .
+      target: development
+    volumes:
+      - .:/app
+      - /node_modules/
+    command: npm run start:debug
+    depends_on:
+      - db
+      - db_shadow
     ports:
       - "3000:3000"
-    depends_on:
-      - postgres
+    restart: unless-stopped
     env_file:
       - .env
-    volumes:
-      - /node_modules/
 
-  postgres:
-    image: postgres:13
-    container_name: postgres
+  db:
+    image: mysql:8.0
+    #    platform: linux/x86_64
+    container_name: db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  db_shadow:
+    image: mysql:8.0
+    #    platform: linux/x86_64
+    container_name: db_shadow
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data_shadow:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: pma
+    links:
+      - db
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
     restart: always
     ports:
-      - "5432:5432"
-    env_file:
-      - .env
-    volumes:
-      - postgres:/var/lib/postgresql/data
-#    networks:
-#      - postgres
-
-  pgadmin:
-    container_name: pgadmin
-    image: dpage/pgadmin4
-    restart: unless-stopped
-    environment:
-      PGADMIN_DEFAULT_EMAIL: 'admin@pgadmin.org'
-      PGADMIN_DEFAULT_PASSWORD: 'admin'
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
-    volumes:
-      - pgadmin:/var/lib/pgadmin
-    ports:
       - "8081:80"
-#    networks:
-#      - postgres
-
-#networks:
-#  postgres:
-#    driver: bridge
 
 volumes:
-  postgres:
-  pgadmin:
+  db_data:
+  db_data_shadow:
