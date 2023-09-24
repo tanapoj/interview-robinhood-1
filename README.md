@@ -21,11 +21,24 @@ npx prisma generate
 
 ## Endpoint
 
+### Login
+```
+POST /auth/login
+body:
+{
+    "email": "user1@mail.com",
+    "password": "123456"
+}
+response:
+{
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInVzZXIiOiJ1c2VyMSIsImVtYWlsIjoidXNlcjFAbWFpbC5jb20iLCJpYXQiOjE2OTU1NzExMzZ9.peGmqZLnyKDze20MqJtv6TugOREcuZ6clcKcnu2Y474"
+}
+```
+
 ### List All Users
 
 ```
 GET /users
-
 response:
 [
     {
@@ -63,6 +76,10 @@ response:
 
 ```
 PUT /users/:id
+
+header:
+- Authorization: Bearer {JWT}
+
 body:
 {
     "name": "user1",
@@ -85,6 +102,9 @@ GET /interviews?status=Todo
 query string:
 - status = [Todo, Inprogress, Done]
 
+header:
+- Authorization: Bearer {JWT}
+
 response:
 [
     {
@@ -102,6 +122,9 @@ response:
 
 ```
 GET /interviews/:id
+
+header:
+- Authorization: Bearer {JWT}
 
 response:
 {
@@ -132,6 +155,10 @@ response:
 
 ```
 POST /interviews
+
+header:
+- Authorization: Bearer {JWT}
+
 body: 
 {
     "description": "รายละเอียดงานหนึ่ง",
@@ -154,6 +181,10 @@ response:
 
 ```
 POST /interviews/:id/comment
+
+header:
+- Authorization: Bearer {JWT}
+
 body: 
 {
     "userId": 1,
@@ -175,6 +206,9 @@ response:
 
 ```
 PUT /interviews/:id/archived
+
+header:
+- Authorization: Bearer {JWT}
 
 response:
 {
