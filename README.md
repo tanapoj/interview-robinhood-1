@@ -1,6 +1,7 @@
 ## Start
 
 ```
+cp .env.example .env
 docker-compose up
 ```
 
@@ -12,6 +13,7 @@ localhost:3000
 
 ## Migrate Database
 
+if run this command in localhost (not in docker), please change DB_HOST in .env to `db` 
 ```
 npx prisma migrate dev
 npx prisma generate

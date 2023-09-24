@@ -1,12 +1,12 @@
 export type Status = 'Todo' | 'InProgress' | 'Done'
 
-export class InterviewCreateDto {
+export interface InterviewCreateDto {
     description: string
     status: Status
     userId: number
 }
 
-export class InterviewUpdateDto {
+export interface InterviewUpdateDto {
     description: string
     status: Status
 }
